@@ -23,6 +23,7 @@ warnings.filterwarnings("ignore")
 
 USE_CUDA = torch.cuda.is_available()
 from dqn import QLearner, compute_td_loss, ReplayBuffer
+import time
 
 env_id = "PongNoFrameskip-v4"
 env = make_atari(env_id)
@@ -62,6 +63,7 @@ while not done:
         print(reward)
     if reward == 1:
         games_won += 1
+    # time.sleep(0.05)
 
 print("Games Won: {}".format(games_won))
 try:

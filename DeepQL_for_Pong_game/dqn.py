@@ -45,11 +45,19 @@ class QLearner(nn.Module):
             return self.features(autograd.Variable(torch.zeros(1, *self.input_shape))).view(1, -1).size(1)
     
     def act(self, state, epsilon):
+        #Epsilon gets greater with the number of learning frames.
+        #Greater epsilon - less probability for if condition to be true
+        #Random EXPLORATION at the start; EXPLOITATION at the end
         if random.random() > epsilon:
             state = Variable(torch.FloatTensor(np.float32(state)).unsqueeze(0), requires_grad=True)
             # TODO: Given state, you should write code to get the Q value and chosen action
+            # Choose the best action to be performed. Hence, maximum reward for a particular action
+            # Exploitation
+            action = torch.argmax(self(state)).item()
 
         else:
+            # Randomly select a valid action
+            # Exploration
             action = random.randrange(self.env.action_space.n)
         return action
 
@@ -84,7 +92,6 @@ class ReplayBuffer(object):
 
     def sample(self, batch_size):
         # TODO: Randomly sampling data with specific batch size from the buffer
-
 
         return state, action, reward, next_state, done
 
