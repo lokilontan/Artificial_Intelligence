@@ -59,6 +59,7 @@ class QLearner(nn.Module):
             # Randomly select a valid action
             # Exploration
             action = random.randrange(self.env.action_space.n)
+            
         return action
 
     def copy_from(self, target):
@@ -73,17 +74,34 @@ def compute_td_loss(model, target_model, batch_size, gamma, replay_buffer):
     action = Variable(torch.LongTensor(action))
     reward = Variable(torch.FloatTensor(reward))
     done = Variable(torch.FloatTensor(done))
+
     # implement the loss function here
-    # TEST EVERYTHING AND UNDERSTAND HOW IT WORKS AFTER IMPLEMENTING THE RANDOM SAMPLER
-    y = target_model(next_state).detach().max(1)[0] #check what is this...
-    #print(y)
-    y *= gamma #check if changed from previous
-    #print(y)
 
+    #Get the Q(s,a;Theta)
+    actual_q = model(state).gather(1,action.unsqueeze(-1)).squeeze(-1)
+    
+    #Start computing y_i
+    #Get max(Q(s',a';Theta))_i
+    expected_y = target_model(next_state).detach().max(1)[0] #check what is this...
+    #Multiply each max(Q(s',a';Theta))_i by gamma
+    expected_y *= gamma #check if changed from previous
+    #Just a tensor of zeros
+    zero = torch.zeros(32)
+    #Condition each max(Q(s',a';Theta))_i * gamma
+        #If done is 1(terminated) then place a zero at that place (max(Q(s',a';Theta))_i * gamma won't contribute)
+        #If done is 0(not the terminal state) then keep the old value
+    expected_y = torch.where(done != 0., zero, expected_y)
+    #Add reward_i to y_i
+    expected_y = expected_y.add(reward)
 
+    #Assign this important flag
+    expected_y.requires_grad = True
+
+    #Use MSELoss to sum app all the (expected_y_i - actual_q_i)^2
+    loss_fn = nn.MSELoss(reduction='sum')
+    loss = loss_fn(expected_y, actual_q)
     
     return loss
-
 
 class ReplayBuffer(object):
     def __init__(self, capacity):
@@ -97,15 +115,13 @@ class ReplayBuffer(object):
 
     def sample(self, batch_size):
         # TODO: Randomly sampling data with specific batch size from the buffer
-        #print(self.buffer[5])
         temp = random.sample(self.buffer, 32)   #Get a random sample of size 32 from the buffer. Output is a nested list
         batch = list(zip(*temp))          #Nested list is kind of a matrix. This statement makes i_th column to be the i_th row
-        state = batch[0]                  #Now retreive each row as an entity of needed valiues
+        state = batch[0]                  #Now retrieve each row as a list of needed valiues
         action = batch[1]                 #...
         reward = batch[2]
         next_state = batch[3]
         done = batch[4]
-        #print (action)
         return state, action, reward, next_state, done
 
     def __len__(self):
