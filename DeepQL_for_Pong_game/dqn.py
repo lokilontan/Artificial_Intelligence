@@ -68,12 +68,17 @@ class QLearner(nn.Module):
 def compute_td_loss(model, target_model, batch_size, gamma, replay_buffer):
     state, action, reward, next_state, done = replay_buffer.sample(batch_size)
 
-    state = Variable(torch.FloatTensor(np.float32(state)))
+    state = Variable(torch.FloatTensor(np.float32(state))).squeeze(1)
     next_state = Variable(torch.FloatTensor(np.float32(next_state)).squeeze(1), requires_grad=True)
     action = Variable(torch.LongTensor(action))
     reward = Variable(torch.FloatTensor(reward))
     done = Variable(torch.FloatTensor(done))
     # implement the loss function here
+    # TEST EVERYTHING AND UNDERSTAND HOW IT WORKS AFTER IMPLEMENTING THE RANDOM SAMPLER
+    y = target_model(next_state).detach().max(1)[0] #check what is this...
+    #print(y)
+    y *= gamma #check if changed from previous
+    #print(y)
 
 
     
@@ -92,7 +97,15 @@ class ReplayBuffer(object):
 
     def sample(self, batch_size):
         # TODO: Randomly sampling data with specific batch size from the buffer
-
+        #print(self.buffer[5])
+        temp = random.sample(self.buffer, 32)   #Get a random sample of size 32 from the buffer. Output is a nested list
+        batch = list(zip(*temp))          #Nested list is kind of a matrix. This statement makes i_th column to be the i_th row
+        state = batch[0]                  #Now retreive each row as an entity of needed valiues
+        action = batch[1]                 #...
+        reward = batch[2]
+        next_state = batch[3]
+        done = batch[4]
+        #print (action)
         return state, action, reward, next_state, done
 
     def __len__(self):
