@@ -79,8 +79,7 @@ for frame_idx in range(1, num_frames + 1):
         print('#Frame: %d, Loss: %f' % (frame_idx, np.mean(losses, 0)[1]))
         print('Last-10 average reward: %f' % np.mean(all_rewards[-10:], 0)[1])
         #Save trained model
-        torch.save(model.state_dict(), "model_personal.pth")
-
+        torch.save(model.state_dict(), "model.pth")
         
     if frame_idx % 50000 == 0:
         target_model.copy_from(model)
