@@ -53,13 +53,14 @@ class QLearner(nn.Module):
             # TODO: Given state, you should write code to get the Q value and chosen action
             # Choose the best action to be performed. Hence, maximum reward for a particular action
             # Exploitation
-            action = torch.argmax(self(state)).item()
+            #action = torch.argmax(self(state)).item()
+            action = random.randrange(self.env.action_space.n)
 
         else:
             # Randomly select a valid action
             # Exploration
             action = random.randrange(self.env.action_space.n)
-            
+
         return action
 
     def copy_from(self, target):
@@ -85,8 +86,8 @@ def compute_td_loss(model, target_model, batch_size, gamma, replay_buffer):
     expected_y = target_model(next_state).detach().max(1)[0] #check what is this...
     #Multiply each max(Q(s',a';Theta))_i by gamma
     expected_y *= gamma #check if changed from previous
-    #Just a tensor of zeros
-    zero = torch.zeros(32)
+    #Just a tensor of zeros. (IMPORTANT: should be on cuda!)
+    zero = torch.zeros(32).cuda()
     #Condition each max(Q(s',a';Theta))_i * gamma
         #If done is 1(terminated) then place a zero at that place (max(Q(s',a';Theta))_i * gamma won't contribute)
         #If done is 0(not the terminal state) then keep the old value
