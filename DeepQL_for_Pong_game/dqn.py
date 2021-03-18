@@ -53,9 +53,8 @@ class QLearner(nn.Module):
             # TODO: Given state, you should write code to get the Q value and chosen action
             # Choose the best action to be performed. Hence, maximum reward for a particular action
             # Exploitation
-            #action = torch.argmax(self(state)).item()
-            action = random.randrange(self.env.action_space.n)
-
+            action = torch.argmax(self(state)).item()
+    
         else:
             # Randomly select a valid action
             # Exploration

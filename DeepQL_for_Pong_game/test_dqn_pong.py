@@ -63,7 +63,7 @@ while not done:
         print(reward)
     if reward == 1:
         games_won += 1
-    time.sleep(0.05)
+    #time.sleep(0.05)
 
 print("Games Won: {}".format(games_won))
 try:

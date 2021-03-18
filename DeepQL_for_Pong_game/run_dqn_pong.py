@@ -18,7 +18,7 @@ env = make_atari(env_id)
 env = wrap_deepmind(env)
 env = wrap_pytorch(env)
 
-num_frames = 1000000
+num_frames = 2000000
 batch_size = 32
 gamma = 0.99
 record_idx = 10000
@@ -26,7 +26,7 @@ record_idx = 10000
 replay_initial = 10000
 replay_buffer = ReplayBuffer(100000)
 model = QLearner(env, num_frames, batch_size, gamma, replay_buffer)
-model.load_state_dict(torch.load("model_pretrainedd.pth", map_location='cpu'))
+model.load_state_dict(torch.load("model_pretrained.pth", map_location='cpu'))
 
 target_model = QLearner(env, num_frames, batch_size, gamma, replay_buffer)
 target_model.copy_from(model)
@@ -37,9 +37,9 @@ if USE_CUDA:
     target_model = target_model.cuda()
     print("Using cuda")
 
-epsilon_start = 1.0
+epsilon_start = 0.6
 epsilon_final = 0.01
-epsilon_decay = 30000
+epsilon_decay = 100000
 epsilon_by_frame = lambda frame_idx: epsilon_final + (epsilon_start - epsilon_final) * math.exp(-1. * frame_idx / epsilon_decay)
 
 losses = []
