@@ -7,3 +7,4 @@ java Main {YourAIModule} -load MTAFT.XYZ
 
 Where {YourAIModule} = AStarDiv (Divisive cost function)
 		    = AStarExp (Exponential cost function)
+x = 1,2,3,4,5,...
